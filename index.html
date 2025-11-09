@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Vibes · 오늘의 날씨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              aurora: {
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                500: '#38bdf8',
+                600: '#0ea5e9',
+                900: '#0f172a'
+              }
+            },
+            boxShadow: {
+              glass: '0 25px 60px rgba(15, 23, 42, 0.22)'
+            }
+          }
+        }
+      };
+    </script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          system-ui, sans-serif;
+        background:
+          radial-gradient(120% 140% at 10% 10%, rgba(56, 189, 248, 0.22), transparent 55%),
+          radial-gradient(90% 120% at 90% 0%, rgba(129, 140, 248, 0.18), transparent 60%),
+          radial-gradient(160% 160% at 50% 120%, rgba(14, 165, 233, 0.3), transparent 70%),
+          #020617;
+      }
+      .glass-card {
+        background: linear-gradient(130deg, rgba(255, 255, 255, 0.9), rgba(224, 242, 254, 0.6));
+        backdrop-filter: blur(18px);
+      }
+      .weather-icon {
+        width: 96px;
+        height: 96px;
+      }
+      .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.85rem 1.15rem;
+        border-radius: 999px;
+        font-weight: 600;
+        background: rgba(226, 232, 240, 0.65);
+        color: #0f172a;
+      }
+      .stat-chip span {
+        font-size: 1.35rem;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="position-relative text-slate-900">
+    <main class="position-relative min-vh-100 d-flex align-items-center py-5 py-lg-6">
+      <div class="container position-relative">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-10 col-xl-8">
+            <div class="glass-card shadow-glass rounded-4 p-4 p-lg-5 border-0">
+              <header
+                class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4"
+              >
+                <div>
+                  <span
+                    class="badge rounded-pill text-bg-primary bg-gradient px-3 py-2 fw-semibold mb-2"
+                  >
+                    ☁️ Weather Vibes
+                  </span>
+                  <h1 class="display-6 fw-bold text-slate-900 mb-2">
+                    전 세계 하늘을 한눈에, 오늘의 감성 날씨
+                  </h1>
+                  <p class="lead text-slate-600 mb-0">
+                    도시를 입력하고 ✨ 세련된 카드로 정리된 실시간 날씨 정보를 확인해 보세요.
+                  </p>
+                </div>
+                <div class="text-lg-end">
+                  <p class="text-slate-500 small mb-1">WeatherAPI.com 데이터 기반</p>
+                  <div class="fs-2" aria-hidden="true">🌦️</div>
+                </div>
+              </header>
+
+              <section class="mb-4">
+                <form id="search-form" class="row gy-3 gx-3 align-items-end">
+                  <div class="col-12 col-md-8">
+                    <label for="city-input" class="form-label fw-semibold text-slate-600">
+                      도시 이름
+                    </label>
+                    <input
+                      id="city-input"
+                      type="text"
+                      name="city"
+                      class="form-control form-control-lg shadow-sm border-0 rounded-3 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-white"
+                      placeholder="예: Seoul, Tokyo, New York"
+                      autocomplete="off"
+                      required
+                    />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold text-slate-600">조회</label>
+                    <button
+                      type="submit"
+                      class="btn btn-primary btn-lg w-100 py-3 rounded-3 fw-semibold d-flex justify-content-center align-items-center gap-2 shadow-sm"
+                    >
+                      <span class="fs-4" aria-hidden="true">🔍</span>
+                      <span>날씨 불러오기</span>
+                    </button>
+                  </div>
+                </form>
+                <p class="text-slate-500 small mt-2 mb-0">
+                  도시명은 한국어/영어 모두 가능해요. 예: <span class="fw-semibold">서울</span>,
+                  <span class="fw-semibold">Busan</span>, <span class="fw-semibold">Paris</span>
+                </p>
+              </section>
+
+              <div id="alert-box" class="mt-2" aria-live="assertive"></div>
+
+              <section id="weather-result" class="mt-4" aria-live="polite"></section>
+
+              <footer class="mt-5 pt-4 border-top border-light-subtle">
+                <div
+                  class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3"
+                >
+                  <div class="text-slate-500 small">
+                    <span class="fw-semibold text-slate-700">팁</span> · 즐겨찾는 도시를 브라우저 북마크에
+                    저장해 두면 더 빠르게 접근할 수 있어요.
+                  </div>
+                  <div class="stat-chip">
+                    <span aria-hidden="true">🌈</span>
+                    오늘도 기분 좋은 하루 되세요!
+                  </div>
+                </div>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var API_KEY = '6f3fd601c6e6418bb1e22925250911';
+        var API_URL = 'https://api.weatherapi.com/v1/current.json';
+        var DEFAULT_CITY = '서울';
+
+        var form = document.querySelector('#search-form');
+        var cityInput = document.querySelector('#city-input');
+        var weatherResult = document.querySelector('#weather-result');
+        var alertBox = document.querySelector('#alert-box');
+
+        function escapeHtml(value) {
+          var target = value === undefined || value === null ? '' : String(value);
+          return target.replace(/[&<>"']/g, function (match) {
+            var table = {
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#039;'
+            };
+            return table[match];
+          });
+        }
+
+        function getConditionEmoji(conditionText, isDay) {
+          var normalized = conditionText ? conditionText.toLowerCase() : '';
+          var emojiTable = [
+            { keywords: ['thunder', 'storm'], emoji: '⛈️' },
+            { keywords: ['rain', 'drizzle', 'shower'], emoji: '🌧️' },
+            { keywords: ['snow', 'sleet', 'blizzard'], emoji: '❄️' },
+            { keywords: ['fog', 'mist', 'cloudy'], emoji: isDay ? '🌥️' : '☁️' },
+            { keywords: ['sunny', 'clear'], emoji: isDay ? '☀️' : '🌙' }
+          ];
+
+          for (var i = 0; i < emojiTable.length; i += 1) {
+            var entry = emojiTable[i];
+            for (var j = 0; j < entry.keywords.length; j += 1) {
+              if (normalized.indexOf(entry.keywords[j]) !== -1) {
+                return entry.emoji;
+              }
+            }
+          }
+
+          return isDay ? '🌤️' : '🌙';
+        }
+
+        function formatLocalTime(localtime) {
+          if (!localtime) {
+            return '';
+          }
+
+          var isoLike = localtime.replace(' ', 'T');
+          var date = new Date(isoLike);
+
+          if (isNaN(date.getTime())) {
+            return localtime;
+          }
+
+          return new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'short',
+            hour: 'numeric',
+            minute: '2-digit'
+          }).format(date);
+        }
+
+        function clearAlert() {
+          alertBox.innerHTML = '';
+        }
+
+        function showError(message) {
+          alertBox.innerHTML =
+            '<div class="alert alert-danger d-flex align-items-center gap-2 rounded-3 shadow-sm mb-0" role="alert">' +
+            '<span class="fs-4" aria-hidden="true">⚠️</span>' +
+            '<div>' +
+            escapeHtml(message) +
+            '</div>' +
+            '</div>';
+        }
+
+        function showLoading(message) {
+          var text = message || '날씨 정보를 불러오는 중이에요...';
+          weatherResult.innerHTML =
+            '<div class="rounded-4 border border-dashed border-slate-200 bg-white/70 py-5 px-4 text-center shadow-sm">' +
+            '<div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>' +
+            '<p class="fw-semibold text-slate-600 mb-0">' +
+            escapeHtml(text) +
+            '</p>' +
+            '</div>';
+        }
+
+        function isFiniteNumber(value) {
+          return typeof value === 'number' && isFinite(value);
+        }
+
+        function renderWeather(data) {
+          var location = data && data.location ? data.location : {};
+          var current = data && data.current ? data.current : {};
+          var condition = current && current.condition ? current.condition : {};
+
+          var conditionText = condition.text || '알 수 없음';
+          var rawIcon = condition.icon || '';
+          var hasHttp = typeof rawIcon === 'string' && rawIcon.indexOf('http') === 0;
+          var iconUrl = rawIcon ? (hasHttp ? rawIcon : "https:".concat(rawIcon)) : '';
+
+          var temperatureC = isFiniteNumber(current.temp_c) ? Math.round(current.temp_c) : '-';
+          var feelsLikeC = isFiniteNumber(current.feelslike_c)
+            ? Math.round(current.feelslike_c)
+            : '-';
+          var windKph = isFiniteNumber(current.wind_kph) ? current.wind_kph.toFixed(1) : '-';
+          var humidity = isFiniteNumber(current.humidity) ? current.humidity : '-';
+          var uvIndex = isFiniteNumber(current.uv) ? current.uv.toFixed(1) : '-';
+          var gustKph = isFiniteNumber(current.gust_kph) ? current.gust_kph.toFixed(1) : '-';
+          var localTime = formatLocalTime(location.localtime);
+          var lastUpdated = formatLocalTime(current.last_updated);
+          var isDay =
+            typeof current.is_day === 'number' ? current.is_day : current.is_day ? 1 : 0;
+          var conditionEmoji = getConditionEmoji(conditionText, isDay);
+
+          var iconMarkup = iconUrl
+            ? '<img src="' +
+              escapeHtml(iconUrl) +
+              '" alt="' +
+              escapeHtml(conditionText) +
+              '" class="weather-icon" loading="lazy" />'
+            : '';
+
+          var cardHtml = '';
+          cardHtml += '<article class="rounded-4 border-0 shadow-sm bg-white/85 p-4 p-lg-5">';
+          cardHtml += '<div class="d-flex flex-column flex-lg-row gap-4 align-items-start">';
+          cardHtml += '<div class="flex-grow-1">';
+          cardHtml += '<div class="d-flex align-items-center gap-3 mb-3">';
+          cardHtml += '<div class="fs-1" aria-hidden="true">' + conditionEmoji + '</div>';
+          cardHtml += '<div>';
+          cardHtml +=
+            '<h2 class="h1 fw-bold text-slate-900 mb-1">' +
+            escapeHtml(location.name || '알 수 없는 지역') +
+            '</h2>';
+          cardHtml +=
+            '<p class="text-slate-500 mb-0">' +
+            escapeHtml(location.region || '') +
+            ' ' +
+            escapeHtml(location.country || '') +
+            '</p>';
+          cardHtml += '</div>';
+          cardHtml += '</div>';
+          cardHtml +=
+            '<p class="text-slate-500 mb-1"><span class="fw-semibold text-slate-700">현지 시각</span> · ' +
+            escapeHtml(localTime) +
+            '</p>';
+          cardHtml +=
+            '<p class="text-slate-500 mb-4"><span class="fw-semibold text-slate-700">최근 업데이트</span> · ' +
+            escapeHtml(lastUpdated) +
+            '</p>';
+          cardHtml += '<div class="d-flex align-items-center gap-4">';
+          cardHtml += '<div>';
+          cardHtml +=
+            '<div class="display-3 fw-bold text-slate-900 mb-1">' +
+            temperatureC +
+            '<span class="fs-4 align-top">°C</span></div>';
+          cardHtml += '<p class="text-slate-500 mb-0">체감온도 ' + feelsLikeC + '°C</p>';
+          cardHtml += '</div>';
+          cardHtml += iconMarkup;
+          cardHtml += '</div>';
+          cardHtml += '</div>';
+          cardHtml += '<div class="flex-grow-1 w-100">';
+          cardHtml += '<div class="bg-aurora-100/60 border border-aurora-200 rounded-4 p-4 h-100">';
+          cardHtml += '<p class="fw-semibold text-slate-700 mb-2">날씨 한 줄 요약</p>';
+          cardHtml +=
+            '<p class="fs-5 text-slate-900 mb-4">' + escapeHtml(conditionText) + '</p>';
+          cardHtml += '<div class="row g-3">';
+
+          cardHtml +=
+            '<div class="col-6"><div class="rounded-3 bg-white/90 border border-slate-200 p-3 shadow-sm">' +
+            '<p class="text-slate-500 mb-1">💧 습도</p>' +
+            '<p class="fw-bold h5 mb-0">' +
+            humidity +
+            '<span class="fs-6">%</span></p>' +
+            '</div></div>';
+
+          cardHtml +=
+            '<div class="col-6"><div class="rounded-3 bg-white/90 border border-slate-200 p-3 shadow-sm">' +
+            '<p class="text-slate-500 mb-1">🌬️ 풍속</p>' +
+            '<p class="fw-bold h5 mb-0">' +
+            windKph +
+            '<span class="fs-6"> km/h</span></p>' +
+            '</div></div>';
+
+          cardHtml +=
+            '<div class="col-6"><div class="rounded-3 bg-white/90 border border-slate-200 p-3 shadow-sm">' +
+            '<p class="text-slate-500 mb-1">🌪️ 돌풍</p>' +
+            '<p class="fw-bold h5 mb-0">' +
+            gustKph +
+            '<span class="fs-6"> km/h</span></p>' +
+            '</div></div>';
+
+          cardHtml +=
+            '<div class="col-6"><div class="rounded-3 bg-white/90 border border-slate-200 p-3 shadow-sm">' +
+            '<p class="text-slate-500 mb-1">🔆 자외선</p>' +
+            '<p class="fw-bold h5 mb-0">' +
+            uvIndex +
+            '</p>' +
+            '</div></div>';
+
+          cardHtml += '</div>'; // row
+          cardHtml += '</div>'; // inner box
+          cardHtml += '</div>'; // flex-grow
+          cardHtml += '</div>'; // flex container
+          cardHtml += '</article>';
+
+          weatherResult.innerHTML = cardHtml;
+        }
+
+        function fetchWeather(city) {
+          var query = city.trim();
+          if (!query) {
+            showError('도시 이름을 입력해주세요.');
+            return;
+          }
+          clearAlert();
+          showLoading();
+
+          var endpoint =
+            API_URL +
+            '?key=' +
+            API_KEY +
+            '&q=' +
+            encodeURIComponent(query) +
+            '&lang=ko&aqi=no';
+
+          fetch(endpoint, {
+            headers: {
+              Accept: 'application/json'
+            }
+          })
+            .then(function (response) {
+              return response.json().then(function (payload) {
+                return {
+                  ok: response.ok,
+                  payload: payload
+                };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok) {
+                var message =
+                  result.payload &&
+                  result.payload.error &&
+                  result.payload.error.message
+                    ? result.payload.error.message
+                    : '날씨 정보를 가져오지 못했어요.';
+                throw new Error(message);
+              }
+              renderWeather(result.payload);
+            })
+            .catch(function (error) {
+              console.error(error);
+              var fallbackMessage =
+                error && error.message
+                  ? error.message
+                  : '일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+              showError(fallbackMessage);
+              weatherResult.innerHTML = '';
+            });
+        }
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          fetchWeather(cityInput.value);
+        });
+
+        cityInput.value = DEFAULT_CITY;
+        fetchWeather(DEFAULT_CITY);
+      })();
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+
